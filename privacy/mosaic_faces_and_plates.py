@@ -2,7 +2,7 @@ import cv2
 import os
 
 # 加载预训练的分类器模型
-face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
+# face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
 plate_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_russian_plate_number.xml')
 
 def apply_mosaic(image, x, y, w, h, neighbor=20):
@@ -27,9 +27,9 @@ def detect_and_mosaic(image_path):
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
     # 检测人脸
-    faces = face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5, minSize=(30, 30))
-    for (x, y, w, h) in faces:
-        image = apply_mosaic(image, x, y, w, h)
+    # faces = face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5, minSize=(30, 30))
+    # for (x, y, w, h) in faces:
+    #     image = apply_mosaic(image, x, y, w, h)
 
     # 检测车牌号
     plates = plate_cascade.detectMultiScale(gray, scaleFactor=1.05, minNeighbors=4, minSize=(30, 30))
