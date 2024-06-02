@@ -5,7 +5,7 @@ import os
 face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
 plate_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_russian_plate_number.xml')
 
-def apply_mosaic(image, x, y, w, h, neighbor=10):
+def apply_mosaic(image, x, y, w, h, neighbor=20):
     """
     对图像的指定区域应用马赛克效果
     """
@@ -51,7 +51,7 @@ def process_multiple_images(image_paths):
     """
     for index, image_path in enumerate(image_paths):
         result_image = detect_and_mosaic(image_path)
-        output_path = f'output_{index}.png'
+        output_path = f'data/outputs/output_{index}.png'
         cv2.imwrite(output_path, result_image)
         
         # 计算新尺寸以适应屏幕大小
@@ -70,7 +70,7 @@ def process_multiple_images(image_paths):
         cv2.waitKey(0)  # 等待用户按键
         cv2.destroyAllWindows()  # 关闭所有窗口
         
-        # 删除输出文件
+        # # 删除输出文件
         if os.path.exists(output_path):
             os.remove(output_path)
             print(f"Deleted the output file: {output_path}")
@@ -78,11 +78,11 @@ def process_multiple_images(image_paths):
 def main():
     # 图片路径列表
     image_paths = [
-        'data/inputs/image.jpg',
+        # 'data/inputs/image.jpg',
         'data/inputs/image2.jpg',
         'data/inputs/image3.jpg',
-        'data/inputs/image4.jpg',
-        'data/inputs/image5.jpg',
+        # 'data/inputs/image4.jpg',
+        # 'data/inputs/image5.jpg',
     ]
     
     # 处理多张图片
