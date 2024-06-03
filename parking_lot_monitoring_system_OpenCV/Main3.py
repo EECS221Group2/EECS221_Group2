@@ -70,7 +70,7 @@ def check_parking_space(img):
 
         # Drawing a rectangle around the parking space and displaying the count of non-zero pixels inside it
         cv2.rectangle(frame, pos, (pos[0] + width, pos[1] + height), color, 1)
-        cv2.putText(frame, str(cv2.countNonZero(img_crop)), (pos[0], pos[1] + height - 5), cv2.FONT_HERSHEY_COMPLEX_SMALL, 0.5, color, 1)
+        #cv2.putText(frame, str(cv2.countNonZero(img_crop)), (pos[0], pos[1] + height - 5), cv2.FONT_HERSHEY_COMPLEX_SMALL, 0.5, color, 1)
 
     # Displaying the total number of free parking spaces out of the total number of parking spaces
     cv2.putText(frame, f'{free_spaces} / {len(pos_list)}', (100, 100), cv2.FONT_HERSHEY_SIMPLEX, 2, (255, 0, 255), 3)
