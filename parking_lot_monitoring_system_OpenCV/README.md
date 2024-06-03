@@ -12,11 +12,7 @@ To run this project, you will need:
 * pickle library
 
 ### Installation
-1. Clone this repository to your local machine using the following command:
-```
-git clone https://github.com/ekrrems/parking_lot_monitoring_system_OpenCV
-```
-2. Install the required libraries using pip:
+1. Install the required libraries using pip:
 
 ```
 pip install opencv-python numpy pickle-mixin
