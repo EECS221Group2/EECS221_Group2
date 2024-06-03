@@ -31,57 +31,101 @@ classes = [
 ]
 
 # load the pre-trained model of yolo_v5
-def load_model(weights_path='yolov5s.pt', device='cpu'):
+def load_model(weights_path='yolov5m.pt', device='cpu'):
     model = DetectMultiBackend(weights_path, device=device)
     model.eval()
     return model
 
 model = load_model()
 
-# set the path of the picutres needed to detect
-input_path = './data/inputs'  
-output_path = './data/outputs'
+# set the path of the targets needed to detect
+img_input_path = './data/inputs/in_img'  
+img_output_path = './data/outputs/out_img'
+vid_input_path = './data/inputs/in_vid'
+vid_output_path = './data/outputs/out_vid'
 
 def perform_cleanup_tasks():
     print("Performing cleanup tasks...")
     print("Cleanup completed.")
 
-# check through the whole folder to fetch the images and export the processed images
-def process_folder(input_path, model, classes):
-    for filename in os.listdir(input_path):
-        # check if the file is a picture or not
-        if filename.lower().endswith(('.png', '.jpg', '.jpeg')):
-            img_path = os.path.join(input_path, filename)
-            original_image = cv2.imread(img_path)
-            if original_image is None:
-                print(f"Failed to load image {img_path}")
-                continue
-            # apply the pre-processed images
-            processed_image = process_image(original_image)  
-            # apply the mosaic to human that detected
-            output_image = detect_and_mosaic(model, processed_image, original_image, classes)
+# check the folder to fetch the images and export the processed images
+def process_images_folder(img_input_path, img_output_path, model, classes):
+    for filename in os.listdir(img_input_path):
+        # check the if it's an img by extension
+        if not (filename.lower().endswith(('.png', '.jpg', '.jpeg'))):
+            print(f"Skipping non-image file: {filename}")
+            continue
+        
+        img_path = os.path.join(img_input_path, filename)
+        original_image = cv2.imread(img_path)
+        if original_image is None:
+            print(f"Failed to load image {img_path}")
+            continue
 
-            # show the processed images
-            cv2.imshow("Mosaic Applied", output_image)
-            cv2.waitKey(0)
-            cv2.destroyAllWindows()
-
-            # save the processed images to the specific path
-            outputpath = os.path.join(output_path, f"mosaic_{filename}")
-            cv2.imwrite(outputpath, output_image)
+        processed_image = process_image(original_image)
+        output_image = detect_and_mosaic(model, processed_image, original_image, classes)
+        img_outputpath = os.path.join(img_output_path, f"mosaic_{filename}")
+        cv2.imwrite(img_outputpath, output_image)
+        print(f"Processed and saved: {img_outputpath}")
 
     print("All images have been processed.")
 
+
+# check the folder to fetch the videos and export the processed video
+def process_videos_folder(vid_input_path, vid_output_path, model, classes):
+    for filename in os.listdir(vid_input_path):
+        # Check if the file is a video by its extension
+        if not filename.lower().endswith(('.mp4', '.avi', '.mov', '.mkv')):
+            print(f"Skipping non-video file: {filename}")
+            continue
+
+        video_path = os.path.join(vid_input_path, filename)
+        output_video_path = os.path.join(vid_output_path, f"mosaic_{filename}")
+        print(f"Processing video: {filename}")
+        process_video(video_path, output_video_path, model, classes)
+        print(f"Processed video saved to {output_video_path}")
+
+    print("All videos have been processed.")
+
+
+
 def process_image(img):
-    img = letterbox(img, new_shape=640)[0] # modify the image size and add the fillings
-    img = img[:, :, ::-1].transpose(2, 0, 1) # BGR to RGB, to 3x416x416  
-    img = np.ascontiguousarray(img)
-    img = torch.from_numpy(img).to('cpu')
-    img = img.float()  # uint8 to fp16/32 to increase calculation efficiency
-    img /= 255.0  # 0 - 255 to 0.0 - 1.0
-    if img.ndimension() == 3:
-        img = img.unsqueeze(0)
+    img = letterbox(img, new_shape=640)[0]  # Adjust size
+    img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)  # Convert BGR to RGB
+    img = np.transpose(img, (2, 0, 1))  # Change data layout to CxHxW
+    if torch.cuda.is_available(): # use GPU if available for better performance
+        img = torch.from_numpy(img).to('cuda')
+    else:
+        img = torch.from_numpy(img).to('cpu')
+    img = img.float() / 255.0  # Normalize to [0, 1]
+    img = img.unsqueeze(0)  # Add batch dimension to match the models' needs
     return img
+
+def process_video(vid_input_path, vid_output_path, model, classes):
+    # open the video file
+    cap = cv2.VideoCapture(vid_input_path)
+    # obtain the basic charateristics of the video
+    fps = int(cap.get(cv2.CAP_PROP_FPS))
+    width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+    height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+    codec = cv2.VideoWriter_fourcc(*'mp4v') 
+    out = cv2.VideoWriter(vid_output_path, codec, fps, (width, height))
+
+    while True:
+        ret, frame = cap.read()
+        if not ret:
+            break
+        # deal with each fps of the video
+        processed_frame = process_image(frame)  
+        output_frame = detect_and_mosaic(model, processed_frame, frame, classes)
+        # write the output video
+        out.write(output_frame)
+
+    # release the resources
+    cap.release()
+    out.release()
+    cv2.destroyAllWindows()
+
 
 # plot the box that surround the 'people' image
 def plot_one_box(xyxy, img, color=(0, 255, 0), label=None, line_thickness=3):
@@ -122,4 +166,9 @@ def apply_mosaic_to_person(img, bbox, neighborhood=15):
         roi_large = cv2.resize(roi_small, (w, h), interpolation=cv2.INTER_NEAREST) # enlarge the image to the original size
         img[y1:y2, x1:x2] = roi_large  # put the enlarged image back into the box
 
-process_folder(input_path, model, classes)
+def main():
+    process_images_folder(img_input_path, img_output_path, model, classes)
+    process_videos_folder(vid_input_path, vid_output_path, model, classes)
+
+if __name__ == "__main__":
+    main()
