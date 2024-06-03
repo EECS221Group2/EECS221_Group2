@@ -1,3 +1,4 @@
+# import necessary libraries
 import torch
 import os
 import sys
@@ -5,6 +6,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import cv2
 
+#load the models
 yolov5_path = './yolov5'
 sys.path.append(yolov5_path)
 
@@ -12,6 +14,7 @@ from models.common import DetectMultiBackend
 from utils.general import non_max_suppression, scale_boxes as scale_coords
 from utils.augmentations import letterbox
 
+# load all the possible objects that can be detected
 classes = [
     "person", "bicycle", "car", "motorcycle", "airplane", "bus", "train", "truck", 
     "boat", "traffic light", "fire hydrant", "stop sign", "parking meter", "bench", 
@@ -27,62 +30,65 @@ classes = [
     "hair drier", "toothbrush"
 ]
 
-
+# load the pre-trained model of yolo_v5
 def load_model(weights_path='yolov5s.pt', device='cpu'):
     model = DetectMultiBackend(weights_path, device=device)
     model.eval()
     return model
 
-folder_path = './'  # 设置你的图片文件夹路径
+model = load_model()
+
+# set the path of the picutres needed to detect
+input_path = './data/inputs'  
+output_path = './data/outputs'
 
 def perform_cleanup_tasks():
     print("Performing cleanup tasks...")
-    # 这里可以添加关闭数据库连接、释放资源或其他清理代码
     print("Cleanup completed.")
 
-def process_folder(folder_path, model, classes):
-    for filename in os.listdir(folder_path):
-        if filename.lower().endswith(('.png', '.jpg', '.jpeg')):  # 检查文件是否为图像文件
-            img_path = os.path.join(folder_path, filename)
+# check through the whole folder to fetch the images and export the processed images
+def process_folder(input_path, model, classes):
+    for filename in os.listdir(input_path):
+        # check if the file is a picture or not
+        if filename.lower().endswith(('.png', '.jpg', '.jpeg')):
+            img_path = os.path.join(input_path, filename)
             original_image = cv2.imread(img_path)
             if original_image is None:
                 print(f"Failed to load image {img_path}")
                 continue
+            # apply the pre-processed images
+            processed_image = process_image(original_image)  
+            # apply the mosaic to human that detected
+            output_image = detect_and_mosaic(model, processed_image, original_image, classes)
 
-            processed_image = process_image(original_image)  # 应用图像预处理
-            output_image = detect_and_mosaic(model, processed_image, original_image, classes)  # 应用马赛克并检测
-
-            # 显示处理后的图像
+            # show the processed images
             cv2.imshow("Mosaic Applied", output_image)
             cv2.waitKey(0)
             cv2.destroyAllWindows()
 
-            # 保存处理后的图像到指定路径
-            output_path = os.path.join(folder_path, f"mosaic_{filename}")
-            cv2.imwrite(output_path, output_image)
+            # save the processed images to the specific path
+            outputpath = os.path.join(output_path, f"mosaic_{filename}")
+            cv2.imwrite(outputpath, output_image)
 
     print("All images have been processed.")
 
-
-    # 执行其他任务，如清理工作或关闭资源
-    perform_cleanup_tasks()
-
 def process_image(img):
-    img = letterbox(img, new_shape=640)[0]  # 调整图像大小并添加填充
-    img = img[:, :, ::-1].transpose(2, 0, 1)  # BGR to RGB, to 3x416x416
+    img = letterbox(img, new_shape=640)[0] # modify the image size and add the fillings
+    img = img[:, :, ::-1].transpose(2, 0, 1) # BGR to RGB, to 3x416x416  
     img = np.ascontiguousarray(img)
     img = torch.from_numpy(img).to('cpu')
-    img = img.float()  # uint8 to fp16/32
+    img = img.float()  # uint8 to fp16/32 to increase calculation efficiency
     img /= 255.0  # 0 - 255 to 0.0 - 1.0
     if img.ndimension() == 3:
         img = img.unsqueeze(0)
     return img
 
+# plot the box that surround the 'people' image
 def plot_one_box(xyxy, img, color=(0, 255, 0), label=None, line_thickness=3):
     """Draw one bounding box on image img."""
     tl = line_thickness or round(0.002 * (img.shape[0] + img.shape[1]) / 2) + 1  # line/font thickness
     color = color[::-1]  # BGR to RGB
-    c1, c2 = (int(xyxy[0]), int(xyxy[1])), (int(xyxy[2]), int(xyxy[3]))
+    c1, c2 = (int(xyxy[0]), int(xyxy[1])), (int(xyxy[2]), int(xyxy[3])) # extract the axis and convert
     cv2.rectangle(img, c1, c2, color, thickness=tl, lineType=cv2.LINE_AA)
     if label:
         tf = max(tl - 1, 1)  # font thickness
@@ -93,38 +99,27 @@ def plot_one_box(xyxy, img, color=(0, 255, 0), label=None, line_thickness=3):
         
 def detect_and_mosaic(model, img, original_image, classes):
     pred = model(img, augment=False, visualize=False)
-    pred = non_max_suppression(pred, 0.3, 0.4, classes=[0], agnostic=False)  # 确定检测人类的类别索引为0
+    pred = non_max_suppression(pred, 0.15, 0.3, classes=[0], agnostic=False)  # make sure that the class of human is '0'
 
-    for i, det in enumerate(pred):  # 遍历每个检测结果
+    for i, det in enumerate(pred):  # check through all the detecting results
         if len(det):
-            # 从img_size调整到原始尺寸
+            # transform the 'image_size' to the original image size
             det[:, :4] = scale_coords(img.shape[2:], det[:, :4], original_image.shape).round()
 
             for *xyxy, conf, cls in det:
-                if int(cls) == 0:  # 检测到的类别为人
-                    apply_mosaic_to_person(original_image, xyxy)  # 对人应用马赛克
+                if int(cls) == 0:  # if the component being detected is human
+                    apply_mosaic_to_person(original_image, xyxy)  # apply mosaic to that human
 
     return original_image
 
+# function that applying moasaic to human image
 def apply_mosaic_to_person(img, bbox, neighborhood=15):
-    x1, y1, x2, y2 = [int(x) for x in bbox]  # 转换为整数
-    roi = img[y1:y2, x1:x2]  # 提取感兴趣区域
+    x1, y1, x2, y2 = [int(x) for x in bbox]  # convert into integer
+    roi = img[y1:y2, x1:x2]  # extract the area contains box labeled as human
     h, w = roi.shape[:2]
-    if h > 0 and w > 0:  # 确保ROI非空
-        roi_small = cv2.resize(roi, (max(1, w // neighborhood), max(1, h // neighborhood)), interpolation=cv2.INTER_LINEAR)
-        roi_large = cv2.resize(roi_small, (w, h), interpolation=cv2.INTER_NEAREST)
-        img[y1:y2, x1:x2] = roi_large  # 将马赛克区域替换回原图
+    if h > 0 and w > 0: 
+        roi_small = cv2.resize(roi, (max(1, w // neighborhood), max(1, h // neighborhood)), interpolation=cv2.INTER_LINEAR) # make the ROI to the small part, losing some details to make the image more like a moasic
+        roi_large = cv2.resize(roi_small, (w, h), interpolation=cv2.INTER_NEAREST) # enlarge the image to the original size
+        img[y1:y2, x1:x2] = roi_large  # put the enlarged image back into the box
 
-model = load_model()
-process_folder(folder_path, model, classes)
-
-# 加载图像并处理
-original_image = cv2.imread('./')
-processed_image = process_image(original_image)
-output_image = detect_and_mosaic(model, processed_image, original_image, classes)
-
-# 显示或保存结果
-cv2.imshow("Mosaic Applied", output_image)
-cv2.waitKey(0)
-cv2.destroyAllWindows()
-cv2.imwrite("output_with_mosaic.jpg", output_image)
+process_folder(input_path, model, classes)
