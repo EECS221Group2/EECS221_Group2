@@ -9,7 +9,7 @@ This is Class EECS221 Internet of Things, group 2. Our main topic is about devel
 
 ## Overview
 
-The `parking_lot_monitoring_system_OpenCV` folder contains the code for our parking lot monitoring system. Here, we use machine learning models to identify cars by their color and parking duration. The `privacy` folder is dedicated to protecting users' information from being leaked to unauthorized parties.
+The `parking_lot_monitoring_system_OpenCV` folder contains the code for our parking lot monitoring system. Here, we use machine learning models to identify cars by their color, parking location and parking time. The `privacy` folder is dedicated to protecting users' information from being leaked to unauthorized parties.
 
 ## Instructions
 
@@ -26,6 +26,8 @@ Note that both `OpenCV` and `PyTorch` are required to run the codes.
 - **Vehicle Identification**: Automatically recognizes vehicle features such as brand and color.
 - **Privacy Protection**: Applies mosaics to sensitive information in stored images, such as human forms and license plates.
 - **Interactive AI**: Users can interact with a generative chat AI to describe their vehicle, and the system matches this description with database entries to display the correct vehicle image.
+- **Parking Assistance**: The system provides real-time information about parking availability and guides drivers to the nearest open parking spot, improving the efficiency of the parking process.
+- **Vehicle Retrieval Assistance**: Enhances user experience by enabling easy retrieval of parked vehicles. Users can describe their vehicle to the system or enter their ticket number, and the system will guide them to their vehicle's location.
 
 ## Technologies Used
 
