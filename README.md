@@ -33,6 +33,7 @@ Note that both `OpenCV` and `PyTorch` are required to run the codes.
 
 - **Artificial Intelligence and Machine Learning**: Utilized for vehicle detection and information matching.
 - **Computer Vision**: Used for processing images from the parking lot cameras.
+- **Yolo**:This project uses YOLO for object detection. YOLO (You Only Look Once) is a state-of-the-art, real-time object detection system. In this project, it's specifically tailored for plate and person figure detecion.
 - **APIs and Database Management**: Handle data storage and retrieval operations efficiently.
 
 ## Contribution
