@@ -38,7 +38,7 @@ The user interacts with the system by describing the car they are looking for. T
 
 ## [QueryLLM.py](QueryLLM.py) Script
 
-This script enables interactive AI conversations using OpenAI's GPT-3.5 Turbo to answer questions about vehicles in a parking lot context:
+This script enables interactive AI conversations using OpenAI's GPT-4 Turbo to answer questions about vehicles in a parking lot context:
 
 - **API Configuration**: Initializes the API key for OpenAI service integration.
 - **Interactive Query Functionality**: Utilizes a structured conversation to generate responses based on user inputs and a placeholder image URL.
@@ -81,4 +81,6 @@ Developers are encouraged to contribute by submitting pull requests or creating 
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE.txt) file for details.
+
+
 
