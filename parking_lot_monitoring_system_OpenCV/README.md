@@ -20,7 +20,7 @@ pip install opencv-python numpy pickle-mixin
 ### Usage
 1. Open a terminal and navigate to the project directory:
 ```
-cd parking_lot_monitoring_system
+cd parking_lot_monitoring_system_OpenCV
 ```
 2. Run the script:
 ```
