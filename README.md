@@ -18,6 +18,7 @@ The project is based on `Python`. The `detect.py` in the `privacy` folder requir
 - `data`: This directory is used for both input and output data.
 - `detect.py`: This script detects human forms and applies mosaics to ensure privacy.
 - `mosaic_faces_and_plates.py`: This script is specifically for detecting and mosaicing faces and license plates.
+- [LLMandPrivacy.py](LLMandPrivacy.py): This is the combination of 
 
 Note that both `OpenCV` and `PyTorch` are required to run the codes.
 
