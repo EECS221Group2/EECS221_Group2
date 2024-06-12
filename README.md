@@ -15,9 +15,9 @@ This project is part of the Class EECS221 Internet of Things, Group 2. We are fo
 
 The project is implemented in `Python`. The [detect.py](privacy/detect.py) script in [privacy](privacy) requires PyTorch to run. The directory includes:
 
-- **[data](privacy/data)**: Stores [input data](privacy/data/inputs/in_img), [output data](privacy/data/outputs/out_img) as well as the [training images](privacy/data/persons).
-- **[mosaic_faces_and_plates.py](privacy/mosaic_faces_and_plates.py)**: Specifically for detecting and mosaicing faces and license plates.
-- **[detect.py](privacy/detect.py)**: Detects human forms and applies mosaics for privacy.
+- **[Data](privacy/data)**: Stores [input data](privacy/data/inputs/in_img), [output data](privacy/data/outputs/out_img) as well as the [training images](privacy/data/persons).
+- **[Mosaic_faces_and_plates.py](privacy/mosaic_faces_and_plates.py)**: Specifically for detecting and mosaicing faces and license plates.
+- **[Detect.py](privacy/detect.py)**: Detects human forms and applies mosaics for privacy.
 
 The [LLMandPrivacy.py](LLMandPrivacy.py) requires `OpenAI API key`, and `base64 library`, and the [QueryLLM.py](QueryLLM.py) requires `OpenAI GPT-4o` access.<br>
 Dependencies include `OpenCV` and `PyTorch`.
