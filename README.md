@@ -49,7 +49,7 @@ This script enables interactive AI conversations using OpenAI's GPT-3.5 Turbo to
 
 Users provide descriptions of their cars, and the AI generates responses aimed at assisting with vehicle identification or information, planning for future integration with live parking lot images.
 
-## [mosaic_faces_and_plates.py](privacy/mosaic_faces_and_plates.py)
+## [mosaic_faces_and_plates.py](privacy/mosaic_faces_and_plates.py) Script
 
 This script enhances privacy by applying mosaic effects to sensitive regions like faces and license plates in images before sending them to the user:
 
