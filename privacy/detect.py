@@ -5,6 +5,7 @@ import sys
 import numpy as np
 import matplotlib.pyplot as plt
 import cv2
+import time
 
 #load the models
 yolov5_path = './yolov5'
@@ -31,7 +32,7 @@ classes = [
 ]
 
 # load the pre-trained model of yolo_v5
-def load_model(weights_path='yolov5m.pt', device='cpu'):
+def load_model(weights_path='best.pt', device='cpu'):
     model = DetectMultiBackend(weights_path, device=device)
     model.eval()
     return model
@@ -70,7 +71,6 @@ def process_images_folder(img_input_path, img_output_path, model, classes):
 
     print("All images have been processed.")
 
-
 # check the folder to fetch the videos and export the processed video
 def process_videos_folder(vid_input_path, vid_output_path, model, classes):
     for filename in os.listdir(vid_input_path):
@@ -86,8 +86,6 @@ def process_videos_folder(vid_input_path, vid_output_path, model, classes):
         print(f"Processed video saved to {output_video_path}")
 
     print("All videos have been processed.")
-
-
 
 def process_image(img):
     img = letterbox(img, new_shape=640)[0]  # Adjust size
@@ -143,7 +141,7 @@ def plot_one_box(xyxy, img, color=(0, 255, 0), label=None, line_thickness=3):
         
 def detect_and_mosaic(model, img, original_image, classes):
     pred = model(img, augment=False, visualize=False)
-    pred = non_max_suppression(pred, 0.15, 0.3, classes=[0], agnostic=False)  # make sure that the class of human is '0'
+    pred = non_max_suppression(pred, 0.8, 0.8, classes=[0], agnostic=False)  # make sure that the class of human is '0'
 
     for i, det in enumerate(pred):  # check through all the detecting results
         if len(det):
@@ -156,19 +154,52 @@ def detect_and_mosaic(model, img, original_image, classes):
 
     return original_image
 
+bbox = (50, 50, 200, 200)  # Example bounding box coordinates
+
 # function that applying moasaic to human image
-def apply_mosaic_to_person(img, bbox, neighborhood=15):
-    x1, y1, x2, y2 = [int(x) for x in bbox]  # convert into integer
-    roi = img[y1:y2, x1:x2]  # extract the area contains box labeled as human
+def apply_mosaic_to_person(image, bbox, neighborhood_size=15):
+     # Convert bounding box coordinates to integers and validate
+    x1, y1, x2, y2 = [int(coord) for coord in bbox]
+    if x1 >= x2 or y1 >= y2 or x1 < 0 or y1 < 0 or x2 > image.shape[1] or y2 > image.shape[0]:
+        print("Invalid bounding box coordinates:", bbox)
+        return image
+
+    # Extract the region of interest (ROI)
+    roi = image[y1:y2, x1:x2]
+
+    # Apply mosaic effect
+    # Reduce the size of the region to apply the mosaic (blocky effect)
     h, w = roi.shape[:2]
-    if h > 0 and w > 0: 
-        roi_small = cv2.resize(roi, (max(1, w // neighborhood), max(1, h // neighborhood)), interpolation=cv2.INTER_LINEAR) # make the ROI to the small part, losing some details to make the image more like a moasic
-        roi_large = cv2.resize(roi_small, (w, h), interpolation=cv2.INTER_NEAREST) # enlarge the image to the original size
-        img[y1:y2, x1:x2] = roi_large  # put the enlarged image back into the box
+    if h > 0 and w > 0:
+        roi_small = cv2.resize(roi, (max(1, w // neighborhood_size), max(1, h // neighborhood_size)), interpolation=cv2.INTER_LINEAR)
+        # Resize back to the original size to spread the pixelation effect
+        roi_mosaic = cv2.resize(roi_small, (w, h), interpolation=cv2.INTER_NEAREST)
+
+        # Add random noise to the mosaic for additional security
+        noise_intensity = np.random.randint(0, 64, roi_mosaic.shape, dtype=np.uint8)
+        roi_mosaic = cv2.add(roi_mosaic, noise_intensity)
+
+        # Replace the original image area with the mosaic
+        image[y1:y2, x1:x2] = roi_mosaic
+
+    return image
 
 def main():
-    process_images_folder(img_input_path, img_output_path, model, classes)
-    process_videos_folder(vid_input_path, vid_output_path, model, classes)
+    # Start the timer
+    start_time = time.time()
+    
+    process_images_folder(img_input_path, img_output_path, model, classes) 
+        
+    # Save or display the output image
+    
+    # End the timer
+    end_time = time.time()
+    
+    # Calculate the duration
+    duration = (end_time - start_time) * 1000
+    print(f"Process completed in {duration:.2f} ms.")
 
 if __name__ == "__main__":
     main()
+
+
