@@ -2,17 +2,23 @@ import cv2
 import os
 
 # 加载预训练的分类器模型
-# face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
 plate_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_russian_plate_number.xml')
 
-def apply_mosaic(image, x, y, w, h, neighbor=20):
+def apply_mosaic(image, x, y, w, h, neighbor=30):
     """
     对图像的指定区域应用马赛克效果
     """
-    mosaic_area = image[y:y+h, x:x+w]
-    mosaic_area = cv2.resize(mosaic_area, (w // neighbor, h // neighbor), interpolation=cv2.INTER_LINEAR)
-    mosaic_area = cv2.resize(mosaic_area, (w, h), interpolation=cv2.INTER_NEAREST)
-    image[y:y+h, x:x+w] = mosaic_area
+    # Extend the mosaic area by a certain percentage
+    extend_percent = 20  # Extend the region by 20% on each side
+    x_start = max(int(x - w * extend_percent / 100), 0)
+    y_start = max(int(y - h * extend_percent / 100), 0)
+    x_end = min(int(x + w + w * extend_percent / 100), image.shape[1])
+    y_end = min(int(y + h + h * extend_percent / 100), image.shape[0])
+
+    mosaic_area = image[y_start:y_end, x_start:x_end]
+    mosaic_area = cv2.resize(mosaic_area, ((x_end - x_start) // neighbor, (y_end - y_start) // neighbor), interpolation=cv2.INTER_LINEAR)
+    mosaic_area = cv2.resize(mosaic_area, (x_end - x_start, y_end - y_start), interpolation=cv2.INTER_NEAREST)
+    image[y_start:y_end, x_start:x_end] = mosaic_area
     return image
 
 def detect_and_mosaic(image_path):
@@ -25,11 +31,6 @@ def detect_and_mosaic(image_path):
         raise FileNotFoundError(f"Could not read the image file: {image_path}")
     
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-
-    # 检测人脸
-    # faces = face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5, minSize=(30, 30))
-    # for (x, y, w, h) in faces:
-    #     image = apply_mosaic(image, x, y, w, h)
 
     # 检测车牌号
     plates = plate_cascade.detectMultiScale(gray, scaleFactor=1.05, minNeighbors=4, minSize=(30, 30))
@@ -51,7 +52,7 @@ def process_multiple_images(image_paths):
     """
     for index, image_path in enumerate(image_paths):
         result_image = detect_and_mosaic(image_path)
-        output_path = f'data/outputs/output_{index}.png'
+        output_path = f'data/outputs/output_{index}.jpg'
         cv2.imwrite(output_path, result_image)
         
         # 计算新尺寸以适应屏幕大小
@@ -71,18 +72,18 @@ def process_multiple_images(image_paths):
         cv2.destroyAllWindows()  # 关闭所有窗口
         
         # # 删除输出文件
-        if os.path.exists(output_path):
-            os.remove(output_path)
-            print(f"Deleted the output file: {output_path}")
+        # if os.path.exists(output_path):
+        #     os.remove(output_path)
+        #     print(f"Deleted the output file: {output_path}")
 
 def main():
     # 图片路径列表
     image_paths = [
-        # 'data/inputs/image.jpg',
-        'data/inputs/image2.jpg',
-        'data/inputs/image3.jpg',
-        # 'data/inputs/image4.jpg',
-        # 'data/inputs/image5.jpg',
+        'data/inputs/black_Tesla.jpg',
+        'data/inputs/gray_Lexus.jpg',
+        'data/inputs/gray_Toyotas.jpg',
+        'data/inputs/red_Toyota.jpg',
+        'data/inputs/white_Benz.jpg',
     ]
     
     # 处理多张图片
