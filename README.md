@@ -15,7 +15,7 @@ This project is part of the Class EECS221 Internet of Things, Group 2. We are fo
 
 The project is implemented in `Python`. The [detect.py](privacy/detect.py) script in [privacy](privacy) requires PyTorch to run. The directory includes:
 
-- **[Data](privacy/data)**: Stores [input data](privacy/data/inputs/in_img), [output data](privacy/data/outputs/out_img) as well as the [training images](privacy/data/persons).
+- **[Data](privacy/data)**: Stores [input img](privacy/data/inputs/in_img), [input_data](privacy/data/inputs), [output img](privacy/data/outputs/out_img), [output_data](privacy/data/output) as well as the [training images](privacy/data/persons).
 - **[Mosaic_faces_and_plates.py](privacy/mosaic_faces_and_plates.py)**: Specifically for detecting and mosaicing faces and license plates.
 - **[Detect.py](privacy/detect.py)**: Detects human forms and applies mosaics for privacy.
 
