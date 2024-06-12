@@ -9,7 +9,7 @@ This project is part of the Class EECS221 Internet of Things, Group 2. We are fo
 
 ## Overview
 
-[Parking_Iot_monitoring_system_OpenCV](parking_lot_monitoring_system_OpenCV) contains the code for our parking lot monitoring system. We use machine learning models to identify cars by their color and parking duration. [Privacy](privacy)focuses on protecting users' information from being leaked to unauthorized parties.
+[Parking_Iot_monitoring_system_OpenCV](parking_lot_monitoring_system_OpenCV) contains the code for our parking lot monitoring system. We use machine learning models to identify cars by their color and parking duration. [Privacy](privacy) focuses on protecting users' information from being leaked to unauthorized parties.
 
 ## Instructions
 
