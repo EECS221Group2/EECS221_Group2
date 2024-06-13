@@ -55,7 +55,7 @@ This script enhances privacy by applying mosaic effects to sensitive regions lik
 
 - **Privacy Protection**: Utilizes Haar cascade classifiers to detect areas requiring anonymization and applies a mosaic effect.
 - **Image Processing**: Handles image conversion and applies pixelation techniques to obscure sensitive details effectively.
-- **Handling Multiple Images**: Processes and displays multiple images, adjusting them to fit screen resolutions and deletes them post-display to ensure data privacy.
+- **Handling Multiple Images**: Processes and displays multiple images, adjusting them to fit screen resolutions.
 - **File Management**: Manages image files carefully, ensuring no sensitive data remains stored after processing.
 
 ### How It Works
